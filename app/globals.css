@@ -1,0 +1,51 @@
+:root{
+  --ink:#12233B; --paper:#F7F4EF; --emerald:#0E7C66; --mint:#3DBF9A;
+  --amber:#E0A050; --slate:#5A6672; --line:#E4DED3; --card:#fff;
+  --shadow:0 1px 2px rgba(18,35,59,.04),0 8px 24px rgba(18,35,59,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--paper);line-height:1.5}
+h1,h2,h3,.serif{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em}
+a{color:var(--emerald);text-decoration:none}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+.site-header{position:sticky;top:0;z-index:20;background:rgba(247,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:62px}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--ink)}
+.logo .mark{width:28px;height:28px;border-radius:7px;background:var(--ink);color:var(--mint);display:grid;place-items:center;font-size:16px}
+.spacer{flex:1}
+.btn{display:inline-flex;align-items:center;gap:7px;border:none;cursor:pointer;font-family:inherit;font-weight:600;font-size:14px;padding:10px 16px;border-radius:9px}
+.btn-primary{background:var(--amber);color:#3d2a08}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.hero{padding:52px 0 22px}
+.hero .eyebrow{color:var(--emerald);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
+.hero h1{font-size:clamp(30px,5vw,48px);line-height:1.06;margin:0 0 14px;max-width:740px}
+.hero p{font-size:18px;color:var(--slate);max-width:600px;margin:0}
+.verified-note{display:inline-flex;align-items:center;gap:6px;background:rgba(61,191,154,.12);color:#0b6b57;border:1px solid rgba(61,191,154,.35);padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.vdot{width:7px;height:7px;border-radius:50%;background:var(--mint)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line);margin-bottom:22px}
+.filter,.search input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff}
+.search{flex:1;min-width:220px}.search input{width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;padding-bottom:60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:12px}
+.card h3{margin:0;font-size:18px;line-height:1.2}
+.loc{color:var(--slate);font-size:13px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:#EDF1F7;color:#233d63;border:1px solid #dbe3f0}
+.chip.type{background:#F7F0E6;color:#7a5518;border-color:#efe1cb}
+.amt{font-family:'Fraunces',serif;font-size:20px;font-weight:600}
+.lbl{font-size:11px;color:var(--slate);text-transform:uppercase;letter-spacing:.05em}
+.src{font-size:11px;color:var(--slate)}
+.foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px dashed var(--line)}
+.vbadge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#0b6b57}
+.bar{height:9px;border-radius:6px;background:#ece6da;overflow:hidden}
+.bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--emerald),var(--mint))}
+.paramrow{display:grid;grid-template-columns:190px 1fr 44px;gap:12px;align-items:center;margin:10px 0;font-size:14px}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:8px 16px;font-size:14px}
+.kv dt{color:var(--slate)}.kv dd{margin:0;font-weight:500}
+.review{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;background:#fff}
+.reply{background:#F3F6F5;border-left:3px solid var(--emerald);padding:10px 12px;border-radius:8px;margin-top:10px;font-size:13px}
+.note{background:#FBF8F2;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--slate)}
+footer.site{border-top:1px solid var(--line);padding:34px 0;color:var(--slate);font-size:13px;margin-top:20px}
+.muted{color:var(--slate)}.small{font-size:13px}
+@media(max-width:640px){.paramrow{grid-template-columns:120px 1fr 40px}.kv{grid-template-columns:1fr}}
