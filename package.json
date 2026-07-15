@@ -1,0 +1,23 @@
+{
+  "name": "theschoolalmanac",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The School Almanac — the verified guide to India's international schools.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "node test/reviewEngine.test.js"
+  },
+  "dependencies": {
+    "next": "14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.5"
+  }
+}
