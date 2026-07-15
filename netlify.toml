@@ -1,0 +1,11 @@
+# Netlify build config for The School Almanac.
+# Using `npm run build` (not a bare `next build`) so the npm "prebuild" hook
+# fires first — that runs scripts/sync-notion.mjs to pull the full school
+# directory from Notion into data/schools.json before Next.js builds the pages.
+# The sync is fail-safe: if NOTION_TOKEN is unset or Notion errors, it keeps the
+# committed data/schools.json and the build still succeeds.
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
