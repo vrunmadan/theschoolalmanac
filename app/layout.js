@@ -22,6 +22,7 @@ export const metadata = {
     type: 'website',
   },
   twitter: { card: 'summary_large_image', title: 'The School Almanac', description: DESC },
+  verification: { google: 'vEOcUzSmgHeTgunM4bwonsD72Z1QuyVGusV8pOFqw5w' },
 };
 
 const siteJsonLd = {
