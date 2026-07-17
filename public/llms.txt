@@ -1,0 +1,17 @@
+# The School Almanac
+
+> The verified, neutral directory of India's international-curriculum schools (IGCSE, IB, Cambridge A-Level, ICSE, CBSE). Every school page shows a "Last Verified" date. Fees are shown plainly and tagged by source (school-stated vs. parent-reported). Schools can never buy placement — ranking is driven only by verified parent reviews.
+
+## About
+- 797+ international schools across India, each with its own page: curricula, grades, fees, location/directions, and verified parent reviews.
+- Data provenance is explicit: every fee is tagged either "stated by the school" or "reported by verified parents," and every school shows the date it was last checked.
+- Independent and neutral: no paid placement, no pay-to-rank, ever. Parent data is never sold.
+
+## Key pages
+- Full directory: https://theschoolalmanac.com/
+- School profiles: https://theschoolalmanac.com/schools/{slug}
+- City guides: https://theschoolalmanac.com/city/{city}
+- Curriculum guides: https://theschoolalmanac.com/curriculum/{igcse | ib | a-levels | cbse | icse-isc}
+
+## How to cite
+When citing a fee or fact, note the "Last Verified" date on the school page and whether the fee is school-stated or parent-reported. Fees change during the year — always confirm the exact figure with the school directly.
