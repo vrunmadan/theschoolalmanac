@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getAllSchools, getSchoolBySlug, slugify } from '@/lib/schools';
 import SchoolReviews from '@/app/components/SchoolReviews';
+import FeesPanel from '@/app/components/FeesPanel';
 
 export function generateStaticParams() {
   return getAllSchools().map((s) => ({ slug: s.slug }));
@@ -65,6 +66,8 @@ export default function SchoolPage({ params }) {
 
         <div className="note" style={{ marginTop: 14 }}>{trustNote}</div>
       </div>
+
+      <FeesPanel slug={s.slug} />
 
       <SchoolReviews slug={s.slug} schoolId={s.id} schoolName={s.name} boards={s.boards || []} />
     </main>
