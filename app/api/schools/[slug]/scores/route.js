@@ -21,7 +21,7 @@ export async function GET(_req, { params }) {
   const { data: reviews, error } = await db
     .from('reviews')
     .select('id, recommend, verification_tier, status, excluded, verified_at, created_at, grade_band, programme, free_text, is_anonymous, review_ratings(parameter, score), review_fee_inputs(component, amount_inr, academic_year), review_responses(response_text, responded_at)')
-    .eq('school_id', school.notion_id || school.id)
+    .eq('school_id', school.slug)
     .eq('status', 'published')
     .eq('excluded', false);
 
@@ -53,5 +53,23 @@ export async function GET(_req, { params }) {
     response: (r.review_responses || [])[0] || null,
   }));
 
-  return NextResponse.json({ ...scores, feesByComponent, reviews: publicReviews });
+  // School-stated fees (source-tagged): latest submission per component.
+  // Schools may state their own fee but can never hide parent-reported fees.
+  const { data: sfees } = await db
+    .from('school_fee_submissions')
+    .select('component, amount_inr, academic_year, stated_at')
+    .eq('school_id', school.slug)
+    .order('stated_at', { ascending: false });
+  const schoolFees = {};
+  for (const f of sfees || []) {
+    if (!schoolFees[f.component]) {
+      schoolFees[f.component] = {
+        amount_inr: Number(f.amount_inr),
+        academic_year: f.academic_year,
+        stated_at: f.stated_at,
+      };
+    }
+  }
+
+  return NextResponse.json({ ...scores, feesByComponent, schoolFees, reviews: publicReviews });
 }
