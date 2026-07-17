@@ -2,6 +2,9 @@ import { notFound } from 'next/navigation';
 import { getAllSchools, getSchoolBySlug, slugify } from '@/lib/schools';
 import SchoolReviews from '@/app/components/SchoolReviews';
 import FeesPanel from '@/app/components/FeesPanel';
+import MapBlock from '@/app/components/MapBlock';
+
+const SITE = 'https://theschoolalmanac.com';
 
 export function generateStaticParams() {
   return getAllSchools().map((s) => ({ slug: s.slug }));
@@ -31,8 +34,41 @@ export default function SchoolPage({ params }) {
     ? 'Some details here come from aggregators or need direct confirmation. We flag rather than hide uncertainty - verify with the school before deciding.'
     : `Fees and curricula last checked ${s.verified}. Fees change through the year - confirm the exact figure with the school.`;
 
+  const canonical = `${SITE}/schools/${s.slug}`;
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'School',
+        '@id': canonical + '#school',
+        name: s.name,
+        url: canonical,
+        ...(s.website ? { sameAs: [s.website] } : {}),
+        ...(s.phone ? { telephone: s.phone } : {}),
+        ...(s.est ? { foundingDate: String(s.est) } : {}),
+        address: {
+          '@type': 'PostalAddress',
+          ...(s.address ? { streetAddress: s.address } : {}),
+          addressLocality: s.city || undefined,
+          ...(s.pincode ? { postalCode: s.pincode } : {}),
+          addressCountry: 'IN',
+        },
+        description: s.summary || `${s.name} in ${s.area || s.city}: ${(s.boards || []).join(', ')}.`,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Schools', item: `${SITE}/` },
+          ...(s.city ? [{ '@type': 'ListItem', position: 2, name: s.city, item: `${SITE}${cityHref}` }] : []),
+          { '@type': 'ListItem', position: s.city ? 3 : 2, name: s.name, item: canonical },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="wrap" style={{ paddingBottom: 60 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <p style={{ margin: '20px 0 6px' }}><a href="/">All schools</a></p>
       <div className="card">
         <span className="verified-note"><span className="vdot" />Last Verified {s.verified}</span>
@@ -62,10 +98,13 @@ export default function SchoolPage({ params }) {
           <dt>Annual tuition</dt><dd>{s.tuition || 'Not yet verified'}</dd>
           <dt>Website</dt><dd>{s.website ? <a href={s.website} target="_blank" rel="noopener noreferrer">Official site</a> : '-'}</dd>
           <dt>Phone</dt><dd>{s.phone || '-'}</dd>
+          {s.address ? <><dt>Address</dt><dd>{s.address}{s.pincode ? ` – ${s.pincode}` : ''}</dd></> : null}
         </dl>
 
         <div className="note" style={{ marginTop: 14 }}>{trustNote}</div>
       </div>
+
+      <MapBlock school={s} />
 
       <FeesPanel slug={s.slug} />
 
