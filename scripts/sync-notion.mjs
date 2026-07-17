@@ -41,6 +41,22 @@ export function slugify(name) {
     .replace(/^-+|-+$/g, '');
 }
 
+// Derive a real city for hub pages. The Notion "City" select only has 8 buckets
+// (metros + "Other"); for "Other" we parse the finer city out of Area/Locality.
+const KNOWN_CITIES = ['Bangalore', 'Mumbai', 'Delhi NCR', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata'];
+export function cityDisplay(citySelect, area) {
+  if (citySelect && KNOWN_CITIES.includes(citySelect)) return citySelect;
+  if (area) {
+    let a = area.split('/')[0].trim();               // take first of "A / B"
+    const parts = a.split(',').map((x) => x.trim()).filter(Boolean);
+    let c = parts[0] || '';
+    if (c.includes(' - ')) c = c.split(' - ').pop().trim();  // "Wadala - Mumbai" -> "Mumbai"
+    c = c.replace(/\s+district$/i, '').trim();        // drop trailing "District"
+    if (c) return c;
+  }
+  return citySelect || 'Other';
+}
+
 export function mapPage(pg) {
   const P = pg.properties || {};
   const name = rt(P['Name']);
@@ -48,7 +64,8 @@ export function mapPage(pg) {
   return {
     nid: pg.id,
     name,
-    city: sel(P['City']),
+    city: cityDisplay(sel(P['City']), rt(P['Area/Locality'])),
+    city_bucket: sel(P['City']),
     area: rt(P['Area/Locality']),
     boards: msel(P['Boards Offered']),
     type: sel(P['School Type']),
@@ -61,6 +78,9 @@ export function mapPage(pg) {
     phone: phone(P['Phone']),
     est: num(P['Established Year']),
     verified: dateStart(P['Last Verified']),
+    gmaps: urlv(P['Google Maps Link']),
+    address: rt(P['Address']),
+    pincode: rt(P['Pincode']),
   };
 }
 
