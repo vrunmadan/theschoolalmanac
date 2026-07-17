@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 import { getBoards, getSchoolsByBoardSlug, byEnrichedFirst, slugify } from '@/lib/schools';
 import SchoolCard from '@/app/components/SchoolCard';
+import JsonLd from '@/app/components/JsonLd';
+
+const SITE = 'https://theschoolalmanac.com';
 
 export function generateStaticParams() {
   return getBoards().map((b) => ({ slug: slugify(b) }));
@@ -14,8 +17,9 @@ export function generateMetadata({ params }) {
   const name = boardName(params.slug);
   const schools = getSchoolsByBoardSlug(params.slug);
   return {
-    title: `${name} schools in India — fees & verified reviews | The School Almanac`,
+    title: `${name} schools in India — fees & verified reviews`,
     description: `Every ${name} school in India in one place: ${schools.length} schools with verified fees, curricula and a Last Verified date. Neutral, parent-first, never pay-to-rank.`,
+    alternates: { canonical: `/curriculum/${params.slug}` },
   };
 }
 
@@ -25,8 +29,24 @@ export default function CurriculumHub({ params }) {
   if (!schools.length) notFound();
   const enriched = schools.filter((s) => s.tier === 'enriched').length;
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${name} schools in India`,
+    url: `${SITE}/curriculum/${params.slug}`,
+    isPartOf: { '@id': `${SITE}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: schools.length,
+      itemListElement: schools.slice(0, 100).map((s, i) => ({
+        '@type': 'ListItem', position: i + 1, name: s.name, url: `${SITE}/schools/${s.slug}`,
+      })),
+    },
+  };
+
   return (
     <main className="wrap" style={{ paddingBottom: 60 }}>
+      <JsonLd data={jsonLd} />
       <p style={{ margin: '20px 0 6px' }}><a href="/">← All schools</a></p>
       <section className="hero" style={{ padding: '28px 0 12px' }}>
         <div className="eyebrow">Curriculum guide</div>
