@@ -1,9 +1,48 @@
 import './globals.css';
 
+const SITE = 'https://theschoolalmanac.com';
+const DESC =
+  "The verified, neutral guide to India's international-curriculum schools (IGCSE, IB, A-Level, Cambridge). Real fees, real facts, a Last Verified date on every school.";
+
 export const metadata = {
-  title: 'The School Almanac — Every international school, verified',
-  description:
-    "The verified, neutral guide to India's international-curriculum schools (IGCSE, IB, A-Level, Cambridge). Real fees, real facts, a Last Verified date on every school.",
+  metadataBase: new URL(SITE),
+  title: {
+    default: 'The School Almanac — Every international school, verified',
+    template: '%s · The School Almanac',
+  },
+  description: DESC,
+  applicationName: 'The School Almanac',
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'The School Almanac — Every international school, verified',
+    description: DESC,
+    url: SITE,
+    siteName: 'The School Almanac',
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: { card: 'summary_large_image', title: 'The School Almanac', description: DESC },
+};
+
+const siteJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE}/#org`,
+      name: 'The School Almanac',
+      url: SITE,
+      description: DESC,
+      slogan: 'Choose your child’s school with the facts, not the marketing.',
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE}/#website`,
+      name: 'The School Almanac',
+      url: SITE,
+      publisher: { '@id': `${SITE}/#org` },
+    },
+  ],
 };
 
 export default function RootLayout({ children }) {
@@ -16,6 +55,7 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       </head>
       <body>
         <header className="site-header">
