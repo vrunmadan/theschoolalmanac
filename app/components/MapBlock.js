@@ -1,7 +1,7 @@
-// Server component. Always renders a free "Get directions" link (no API key,
-// no cost). If NEXT_PUBLIC_MAPS_EMBED_KEY is set, it also renders Google's free,
-// unlimited Maps Embed (Place mode) — adding the key later lights up interactive
-// maps on every school page with zero code changes.
+// Server component. Renders an interactive Google Map + a free "Get directions"
+// link. The interactive map uses Google's KEYLESS embed by default (no API key,
+// no billing account, no cost). If NEXT_PUBLIC_MAPS_EMBED_KEY is ever set, it
+// upgrades to the official Maps Embed API automatically.
 const KEY = process.env.NEXT_PUBLIC_MAPS_EMBED_KEY;
 
 function locQuery(s) {
@@ -12,6 +12,9 @@ export default function MapBlock({ school }) {
   const q = locQuery(school);
   const enc = encodeURIComponent(q);
   const directionsHref = school.gmaps || `https://www.google.com/maps/search/?api=1&query=${enc}`;
+  const embedSrc = KEY
+    ? `https://www.google.com/maps/embed/v1/place?key=${KEY}&q=${enc}&zoom=15`
+    : `https://maps.google.com/maps?q=${enc}&z=15&output=embed`;
   const addr = school.address
     ? school.address + (school.pincode ? ` – ${school.pincode}` : '')
     : [school.area, school.city].filter(Boolean).join(', ');
@@ -23,23 +26,17 @@ export default function MapBlock({ school }) {
         <a className="btn btn-primary" href={directionsHref} target="_blank" rel="noopener noreferrer">📍 Get directions</a>
       </div>
       {addr ? <p className="small muted" style={{ marginTop: 8 }}>{addr}</p> : null}
-      {KEY ? (
-        <div style={{ marginTop: 12, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)' }}>
-          <iframe
-            title={`Map of ${school.name}`}
-            loading="lazy"
-            width="100%"
-            height="300"
-            style={{ border: 0, display: 'block' }}
-            referrerPolicy="no-referrer-when-downgrade"
-            src={`https://www.google.com/maps/embed/v1/place?key=${KEY}&q=${enc}`}
-          />
-        </div>
-      ) : (
-        <p className="small muted" style={{ marginTop: 6 }}>
-          Opens Google Maps with directions from your location.
-        </p>
-      )}
+      <div style={{ marginTop: 12, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--line)' }}>
+        <iframe
+          title={`Map of ${school.name}`}
+          loading="lazy"
+          width="100%"
+          height="300"
+          style={{ border: 0, display: 'block' }}
+          referrerPolicy="no-referrer-when-downgrade"
+          src={embedSrc}
+        />
+      </div>
     </div>
   );
 }
