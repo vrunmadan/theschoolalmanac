@@ -72,6 +72,11 @@ export default function RootLayout({ children }) {
             <b style={{ color: 'var(--ink)' }}>Our promise:</b> schools can never buy placement or ranking —
             position is driven by verified parent ratings alone. We publish fees plainly, flag uncertainty,
             and never sell parent data.
+            <div style={{ marginTop: 12 }}>
+              <a href="/contact">Contact &amp; suggest a change</a>
+              {' · '}
+              <a href="/contact">Add or remove a school</a>
+            </div>
           </div>
         </footer>
       </body>
