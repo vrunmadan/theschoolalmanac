@@ -85,16 +85,20 @@ create table if not exists school_claims (
   contact_email      text not null,
   email_domain       text,
   domain_match       boolean not null default false,
-  status             text not null default 'pending' check (status in ('pending','verified','rejected')),
+  status             text not null default 'pending' check (status in
+    ('pending','pending_confirmation','verified','rejected')),
   dashboard_token    text,          -- legacy plaintext column; kept for rows written before
                                      -- migration 0001, no longer written to by new code.
-  token_hash         text,          -- sha256(token), what new code checks against.
+  token_hash         text,          -- sha256(dashboard token) — the fee-editing bearer key.
   token_expires_at   timestamptz,
+  confirm_token_hash text,          -- sha256(email-confirmation token), single-use, cleared on redemption.
+  confirm_expires_at timestamptz,
   verified_at        timestamptz,
   created_at         timestamptz not null default now()
 );
 create index if not exists school_claims_slug_idx on school_claims (school_slug);
 create index if not exists school_claims_token_hash_idx on school_claims (token_hash);
+create index if not exists school_claims_confirm_token_hash_idx on school_claims (confirm_token_hash);
 
 create table if not exists school_fee_submissions (
   id             uuid primary key default gen_random_uuid(),

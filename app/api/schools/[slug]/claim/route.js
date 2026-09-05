@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseAdmin, reviewsConfigured } from '@/lib/supabaseServer';
 import { getSchoolBySlug } from '@/lib/schools';
-import { hashToken, TOKEN_TTL_MS } from '@/lib/tokenHash';
+import { hashToken, CONFIRM_TTL_MS } from '@/lib/tokenHash';
+import { sendMail } from '@/lib/mailer';
+
+const SITE = 'https://theschoolalmanac.com';
 
 // domain of a website URL, lowercased, without leading www.
 function domainOf(url) {
@@ -19,8 +22,14 @@ function subOrEq(a, b) {
 }
 
 // POST /api/schools/:slug/claim — a school rep requests to claim their listing.
-// If the work-email domain matches the school's official website domain we treat
-// that as a strong signal and auto-verify, issuing a private dashboard token.
+//
+// A domain match between the submitted email and the school's own website is a
+// real signal but NOT proof of mailbox control — anyone can type an address
+// they don't own. So a domain match no longer auto-verifies on the spot: it
+// sends a confirmation link to that address, and only clicking it (proving the
+// sender actually controls that inbox) promotes the claim to verified and
+// issues a dashboard token. No domain match at all still falls back to manual
+// admin review (POST /api/admin/claims/:id/verify).
 export async function POST(req, { params }) {
   const school = getSchoolBySlug(params.slug);
   if (!school) return NextResponse.json({ error: 'not_found' }, { status: 404 });
@@ -37,14 +46,11 @@ export async function POST(req, { params }) {
   const ed = emailDomain(contact_email);
   const sd = domainOf(school.website);
   const match = Boolean(ed && sd && subOrEq(ed, sd));
-  const status = match ? 'verified' : 'pending';
-  const token = match ? crypto.randomBytes(24).toString('hex') : null;
 
-  // Store only the token's hash (see db/migrations/0001_claim_token_hardening.sql) —
-  // the plaintext token is returned once, below, and never persisted. A domain-match
-  // auto-verify is a real signal but not proof of mailbox control, so the credential
-  // it issues is bounded: it expires and must be reclaimed, not permanent.
-  const { error } = await db.from('school_claims').insert({
+  const confirmToken = match ? crypto.randomBytes(24).toString('hex') : null;
+  const status = match ? 'pending_confirmation' : 'pending';
+
+  const { data: claim, error } = await db.from('school_claims').insert({
     school_slug: school.slug,
     contact_name: contact_name || null,
     contact_role: contact_role || null,
@@ -52,17 +58,26 @@ export async function POST(req, { params }) {
     email_domain: ed,
     domain_match: match,
     status,
-    token_hash: match ? hashToken(token) : null,
-    token_expires_at: match ? new Date(Date.now() + TOKEN_TTL_MS).toISOString() : null,
-    verified_at: match ? new Date().toISOString() : null,
-  });
+    confirm_token_hash: match ? hashToken(confirmToken) : null,
+    confirm_expires_at: match ? new Date(Date.now() + CONFIRM_TTL_MS).toISOString() : null,
+  }).select('id').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   if (match) {
+    const confirmUrl = `${SITE}/schools/${school.slug}/claim/confirm?claim=${claim.id}&token=${confirmToken}`;
+    const mail = await sendMail({
+      to: contact_email,
+      subject: `Confirm your claim of ${school.name} on The School Almanac`,
+      text: `Someone requested to claim the ${school.name} listing on The School Almanac using this email address. If that was you, confirm here (valid 48 hours): ${confirmUrl}\n\nIf you didn't request this, ignore this email.`,
+    });
     return NextResponse.json({
-      status: 'verified',
-      dashboard_token: token,
-      message: 'Verified via your school email domain. Save your private dashboard key below.',
+      status: 'pending_confirmation',
+      message: mail.delivered
+        ? `Check ${contact_email} for a confirmation link — click it to activate your dashboard.`
+        : `Email sending isn't configured on this deployment yet, so here's your confirmation link directly: ${confirmUrl}`,
+      // Only present while no mail provider is configured (see lib/mailer.js) —
+      // once one is, a claim shouldn't rely on this appearing in an API response.
+      ...(mail.delivered ? {} : { dev_confirm_url: confirmUrl }),
     }, { status: 201 });
   }
   return NextResponse.json({

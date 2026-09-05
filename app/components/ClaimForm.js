@@ -19,21 +19,23 @@ export default function ClaimForm({ slug, schoolName }) {
       const b = await res.json();
       if (res.status === 503) setResult({ kind: 'err', msg: 'Claiming isn’t enabled on this deployment yet.' });
       else if (!res.ok) setResult({ kind: 'err', msg: 'Could not submit: ' + (b.error || res.status) });
-      else if (b.status === 'verified') setResult({ kind: 'verified', token: b.dashboard_token, msg: b.message });
+      else if (b.status === 'pending_confirmation') setResult({ kind: 'confirm', msg: b.message, devUrl: b.dev_confirm_url });
       else setResult({ kind: 'pending', msg: b.message });
     } catch { setResult({ kind: 'err', msg: 'Network error — please try again.' }); }
     finally { setBusy(false); }
   }
 
-  if (result?.kind === 'verified') {
+  if (result?.kind === 'confirm') {
     return (
       <div className="card">
-        <h2 style={{ marginTop: 0, fontSize: 22 }}>You’re verified ✓</h2>
+        <h2 style={{ marginTop: 0, fontSize: 22 }}>Confirm your email ✉️</h2>
         <p className="small">{result.msg}</p>
-        <label className="small" style={{ fontWeight: 600, display: 'block', margin: '10px 0 6px' }}>Your private dashboard key (save it — shown once)</label>
-        <input readOnly value={result.token} className="filter" style={{ width: '100%', fontFamily: 'monospace' }} onFocus={(e) => e.target.select()} />
-        <a className="btn btn-primary" href={`/schools/${slug}/dashboard`} style={{ display: 'inline-block', marginTop: 14 }}>Open your fee dashboard →</a>
-        <p className="small muted" style={{ marginTop: 10 }}>You’ll paste this key on the dashboard to update fees. Keep it safe — anyone with it can edit your school’s stated fees.</p>
+        {result.devUrl && (
+          <div className="note" style={{ marginTop: 12 }}>
+            <b>Email sending isn’t configured on this deployment yet</b>, so as a stand-in
+            here’s the confirmation link directly: <a href={result.devUrl}>{result.devUrl}</a>
+          </div>
+        )}
       </div>
     );
   }
@@ -44,7 +46,7 @@ export default function ClaimForm({ slug, schoolName }) {
   return (
     <div className="card">
       <h2 style={{ marginTop: 0, fontSize: 22 }}>Claim {schoolName}</h2>
-      <p className="small muted">Use your official school email — if its domain matches the school’s website, you’re verified instantly and can update fees. We never sell or display your email.</p>
+      <p className="small muted">Use your official school email — if its domain matches the school’s website, we’ll email you a confirmation link to activate your dashboard. We never sell or display your email.</p>
       <div style={{ marginBottom: 12 }}>
         <label className="small" style={{ fontWeight: 600, display: 'block', marginBottom: 6 }}>Your name</label>
         <input value={f.contact_name} onChange={(e) => set('contact_name', e.target.value)} className="filter" style={{ width: '100%' }} placeholder="Full name" />
