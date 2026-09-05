@@ -76,6 +76,10 @@ export default function RootLayout({ children }) {
               <a href="/contact">Contact &amp; suggest a change</a>
               {' · '}
               <a href="/contact">Add or remove a school</a>
+              {' · '}
+              <a href="/privacy">Privacy</a>
+              {' · '}
+              <a href="/terms">Terms</a>
             </div>
           </div>
         </footer>

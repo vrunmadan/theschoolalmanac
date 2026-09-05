@@ -19,7 +19,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(__dirname, '..', 'data', 'schools.json');
 
 const TOKEN = process.env.NOTION_TOKEN;
-const DB_ID = process.env.NOTION_DB_ID || '910e3723cfae4e78bd424f8ed09b2bc3';
+// .env.example historically documented NOTION_DATA_SOURCE_ID while this script read
+// NOTION_DB_ID with a *different* hardcoded default — a real config-drift risk if
+// Netlify only ever had one of the two names set. Read both, preferring NOTION_DB_ID
+// (what this script has always actually used) so an existing Netlify config keeps
+// working unchanged; warn loudly when falling back to the hardcoded default, since
+// that default may not be the database the daily enrichment automation writes to.
+const DEFAULT_DB_ID = '910e3723cfae4e78bd424f8ed09b2bc3';
+const DB_ID = process.env.NOTION_DB_ID || process.env.NOTION_DATA_SOURCE_ID || DEFAULT_DB_ID;
 const NOTION_VERSION = '2022-06-28';
 
 const log = (...a) => console.log('[sync-notion]', ...a);
@@ -136,6 +143,11 @@ async function main() {
   if (!TOKEN) {
     log('NOTION_TOKEN not set — keeping committed data/schools.json (fallback).');
     return;
+  }
+  if (!process.env.NOTION_DB_ID && !process.env.NOTION_DATA_SOURCE_ID) {
+    log('WARNING: neither NOTION_DB_ID nor NOTION_DATA_SOURCE_ID is set — using the ' +
+        'hardcoded default (' + DEFAULT_DB_ID + '). Verify in the Netlify dashboard that ' +
+        'this is actually the database the daily enrichment automation writes to.');
   }
   try {
     const rows = await queryAll();

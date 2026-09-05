@@ -108,7 +108,10 @@ export default function SchoolPage({ params }) {
 
       <FeesPanel slug={s.slug} />
 
-      <SchoolReviews slug={s.slug} schoolId={s.id} schoolName={s.name} boards={s.boards || []} />
+      {/* schoolId must match the key /api/schools/[slug]/scores queries reviews by
+          (school.slug — see app/api/schools/[slug]/scores/route.js), not the Notion
+          page id in s.id, or submitted reviews are stored under a key nothing reads. */}
+      <SchoolReviews slug={s.slug} schoolId={s.slug} schoolName={s.name} boards={s.boards || []} />
     </main>
   );
 }

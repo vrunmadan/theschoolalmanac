@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { supabaseAdmin, reviewsConfigured } from '@/lib/supabaseServer';
 import { getSchoolBySlug } from '@/lib/schools';
+import { hashToken, TOKEN_TTL_MS } from '@/lib/tokenHash';
 
 // domain of a website URL, lowercased, without leading www.
 function domainOf(url) {
@@ -39,6 +40,10 @@ export async function POST(req, { params }) {
   const status = match ? 'verified' : 'pending';
   const token = match ? crypto.randomBytes(24).toString('hex') : null;
 
+  // Store only the token's hash (see db/migrations/0001_claim_token_hardening.sql) —
+  // the plaintext token is returned once, below, and never persisted. A domain-match
+  // auto-verify is a real signal but not proof of mailbox control, so the credential
+  // it issues is bounded: it expires and must be reclaimed, not permanent.
   const { error } = await db.from('school_claims').insert({
     school_slug: school.slug,
     contact_name: contact_name || null,
@@ -47,7 +52,8 @@ export async function POST(req, { params }) {
     email_domain: ed,
     domain_match: match,
     status,
-    dashboard_token: token,
+    token_hash: match ? hashToken(token) : null,
+    token_expires_at: match ? new Date(Date.now() + TOKEN_TTL_MS).toISOString() : null,
     verified_at: match ? new Date().toISOString() : null,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

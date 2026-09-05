@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin, reviewsConfigured } from '@/lib/supabaseServer';
 import { getSchoolBySlug } from '@/lib/schools';
+import { hashToken } from '@/lib/tokenHash';
 
 const COMPONENTS = ['tuition', 'admission', 'transport', 'tech_books', 'deposit', 'other'];
 
@@ -13,17 +14,21 @@ async function listFees(db, slug) {
   return (data || []).map((f) => ({ ...f, amount_inr: Number(f.amount_inr) }));
 }
 
-// A verified claim's dashboard_token is the bearer key for fee edits.
+// A verified claim's token is the bearer key for fee edits. Looked up by hash
+// (see db/migrations/0001_claim_token_hardening.sql) — the plaintext token is
+// never stored, so this can only ever match against the hash of what's presented.
 async function claimForToken(db, slug, token) {
   if (!token) return null;
   const { data } = await db
     .from('school_claims')
-    .select('id, contact_name, contact_role, contact_email, status')
+    .select('id, contact_name, contact_role, contact_email, status, token_expires_at')
     .eq('school_slug', slug)
-    .eq('dashboard_token', token)
+    .eq('token_hash', hashToken(token))
     .eq('status', 'verified')
     .maybeSingle();
-  return data || null;
+  if (!data) return null;
+  if (data.token_expires_at && new Date(data.token_expires_at).getTime() < Date.now()) return null;
+  return data;
 }
 
 // POST /api/schools/:slug/fees

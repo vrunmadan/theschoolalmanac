@@ -23,7 +23,12 @@ export default function CityHub({ params }) {
   const schools = byEnrichedFirst(getSchoolsByCitySlug(params.slug));
   if (!schools.length) notFound();
   const city = schools[0].city;
-  const enriched = schools.filter((s) => s.tier === 'enriched').length;
+  // NOTE: this counts schools with an editorial profile (tier === 'enriched'), not
+  // schools with a verified fee on file. Fees are only ever verified via the Supabase
+  // claim/review flow (lib/schools.js strips imported fees), so a true "verified fees"
+  // count must come from school_fee_submissions, not this tier. Until that's wired up,
+  // label this accurately rather than implying a fee-verification count that isn't real.
+  const withProfile = schools.filter((s) => s.tier === 'enriched').length;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -48,7 +53,7 @@ export default function CityHub({ params }) {
         <div className="eyebrow">City guide</div>
         <h1>International schools in {city}</h1>
         <p className="small muted" style={{ marginTop: 10 }}>
-          <b style={{ color: 'var(--ink)' }}>{schools.length}</b> schools · <b style={{ color: 'var(--ink)' }}>{enriched}</b> with verified fees · 0 paid rankings, ever
+          <b style={{ color: 'var(--ink)' }}>{schools.length}</b> schools · <b style={{ color: 'var(--ink)' }}>{withProfile}</b> with a full verified profile · 0 paid rankings, ever
         </p>
       </section>
       <div className="grid">
