@@ -13,6 +13,11 @@
 -- table), the backfill step below computes their token_hash so existing tokens
 -- keep working after the code switch.
 
+-- digest() below needs pgcrypto. Your project almost certainly already has this
+-- (it's what generates the uuid primary keys on your existing tables), but this
+-- makes the migration self-contained regardless.
+create extension if not exists pgcrypto;
+
 alter table school_claims add column if not exists token_hash text;
 alter table school_claims add column if not exists token_expires_at timestamptz;
 
