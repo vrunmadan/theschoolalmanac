@@ -51,6 +51,27 @@ export function slugify(name) {
 // Derive a real city for hub pages. The Notion "City" select only has 8 buckets
 // (metros + "Other"); for "Other" we parse the finer city out of Area/Locality.
 const KNOWN_CITIES = ['Bangalore', 'Mumbai', 'Delhi NCR', 'Hyderabad', 'Chennai', 'Pune', 'Kolkata'];
+
+// Free-text Area/Locality parsing produces genuine misspelling duplicates —
+// confirmed live: /city/hoshiapur, /city/hoshiapurt and /city/hoshiarpur were
+// three separate one-school pages for the same town. Only merge pairs verified
+// to be the same real place; DO NOT extend this by fuzzy-matching short city
+// names generally — e.g. Jaipur/Kanpur/Nagpur/Raipur/Udaipur are five different
+// real cities that happen to be edit-distance 2 apart.
+const CITY_ALIASES = {
+  'hoshiapur': 'Hoshiarpur', 'hoshiapurt': 'Hoshiarpur', 'hoshiarpur': 'Hoshiarpur',
+  'jodphur': 'Jodhpur', 'jodhpur': 'Jodhpur',
+  'bhubaneshwar': 'Bhubaneswar', 'bhubaneswar': 'Bhubaneswar',
+  'luchnow': 'Lucknow', 'lucknow': 'Lucknow',
+  'tiruppur': 'Tiruppur', 'tirupur': 'Tiruppur',
+  'mira-bhayandar': 'Mira Bhayandar', 'mira-bhyander': 'Mira Bhayandar', 'mira bhyander': 'Mira Bhayandar',
+  'visakhapatnam': 'Visakhapatnam', 'vishakapatnam': 'Visakhapatnam',
+};
+function normalizeCity(c) {
+  const alias = CITY_ALIASES[c.toLowerCase()];
+  return alias || c;
+}
+
 export function cityDisplay(citySelect, area) {
   if (citySelect && KNOWN_CITIES.includes(citySelect)) return citySelect;
   if (area) {
@@ -59,7 +80,7 @@ export function cityDisplay(citySelect, area) {
     let c = parts[0] || '';
     if (c.includes(' - ')) c = c.split(' - ').pop().trim();  // "Wadala - Mumbai" -> "Mumbai"
     c = c.replace(/\s+district$/i, '').trim();        // drop trailing "District"
-    if (c) return c;
+    if (c) return normalizeCity(c);
   }
   return citySelect || 'Other';
 }

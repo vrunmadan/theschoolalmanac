@@ -36,8 +36,10 @@ export default function PrivacyPage() {
           <li><b>School claims</b>: the name, role and email of whoever claims a school
             listing on the school's behalf, so we can grant dashboard access.</li>
           <li><b>Standard web analytics</b>: aggregate, non-identifying traffic data via
-            Google Search Console. We do not currently run cookie-based product analytics;
-            if we add one (e.g. Plausible/GA4), this policy will be updated first.</li>
+            Google Search Console, and, once configured, Google Analytics 4 (page views,
+            approximate location, device type — IP-anonymized by default). We use this to
+            understand which pages and cities are useful, never to identify an individual
+            visitor or sell data about you.</li>
         </ul>
 
         <h2 style={{ fontSize: 20 }}>2. What we never do</h2>

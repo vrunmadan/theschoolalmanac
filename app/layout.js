@@ -1,4 +1,5 @@
 import './globals.css';
+import Analytics from '@/app/components/Analytics';
 
 const SITE = 'https://theschoolalmanac.com';
 const DESC =
@@ -59,6 +60,7 @@ export default function RootLayout({ children }) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       </head>
       <body>
+        <Analytics />
         <header className="site-header">
           <div className="wrap nav">
             <a href="/" className="logo"><span className="mark">✓</span>The School Almanac</a>
@@ -70,8 +72,9 @@ export default function RootLayout({ children }) {
         <footer className="site">
           <div className="wrap">
             <b style={{ color: 'var(--ink)' }}>Our promise:</b> schools can never buy placement or ranking —
-            position is driven by verified parent ratings alone. We publish fees plainly, flag uncertainty,
-            and never sell parent data.
+            no fee or payment ever changes a school&apos;s position. Listings are ordered by how complete
+            their verified profile is today; once verified parent reviews are live, ranking will be driven
+            by those ratings. We publish fees plainly, flag uncertainty, and never sell parent data.
             <div style={{ marginTop: 12 }}>
               <a href="/contact">Contact &amp; suggest a change</a>
               {' · '}

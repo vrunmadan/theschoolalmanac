@@ -53,7 +53,7 @@ export default function CityHub({ params }) {
         <div className="eyebrow">City guide</div>
         <h1>International schools in {city}</h1>
         <p className="small muted" style={{ marginTop: 10 }}>
-          <b style={{ color: 'var(--ink)' }}>{schools.length}</b> schools · <b style={{ color: 'var(--ink)' }}>{withProfile}</b> with a full verified profile · 0 paid rankings, ever
+          <b style={{ color: 'var(--ink)' }}>{schools.length}</b> {schools.length === 1 ? 'school' : 'schools'} · <b style={{ color: 'var(--ink)' }}>{withProfile}</b> with a full verified profile · 0 paid rankings, ever
         </p>
       </section>
       <div className="grid">
