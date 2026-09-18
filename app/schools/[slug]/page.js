@@ -16,6 +16,7 @@ export function generateMetadata({ params }) {
   return {
     title: `${s.name} - fees, curricula and verified parent reviews`,
     description: `${s.name} in ${s.area || s.city}: ${(s.boards || []).join(', ')}. ${s.summary || ''} Last verified ${s.verified}.`,
+    alternates: { canonical: `/schools/${s.slug}` },
   };
 }
 
