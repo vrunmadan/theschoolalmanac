@@ -18,59 +18,59 @@ create extension if not exists "pgcrypto";
 -- reviews — one row per parent review submission.
 -- ---------------------------------------------------------------------------
 create table if not exists reviews (
-  id                 uuid primary key default gen_random_uuid(),
-  school_id          text not null,              -- MUST be the school's slug (see
+    id                 uuid primary key default gen_random_uuid(),
+    school_id          text not null,              -- MUST be the school's slug (see
                                                    -- app/api/schools/[slug]/scores/route.js
                                                    -- which queries school_id = slug).
   parent_ref         text not null,               -- sha256(salt|identity), never raw PII.
   academic_year      text not null,               -- e.g. '2025-26'
   recommend          text not null check (recommend in ('yes','caveats','no')),
-  programme          text[],
-  grade_band         text,
-  years_at_school    text,
-  relationship       text,
-  free_text          text,
-  is_anonymous       boolean not null default true,
-  verification_tier  text not null default 'T0' check (verification_tier in ('T0','T1','T2')),
-  status             text not null default 'pending' check (status in ('pending','published','removed')),
-  excluded           boolean not null default false,   -- set by anti-gaming (self-review/burst)
+    programme          text[],
+    grade_band         text,
+    years_at_school    text,
+    relationship       text,
+    free_text          text,
+    is_anonymous       boolean not null default true,
+    verification_tier  text not null default 'T0' check (verification_tier in ('T0','T1','T2')),
+    status             text not null default 'pending' check (status in ('pending','published','removed')),
+    excluded           boolean not null default false,   -- set by anti-gaming (self-review/burst)
   verified_at        timestamptz,
-  created_at         timestamptz not null default now(),
-  unique (parent_ref, school_id, academic_year)
-);
+    created_at         timestamptz not null default now(),
+    unique (parent_ref, school_id, academic_year)
+  );
 create index if not exists reviews_school_id_idx on reviews (school_id);
 create index if not exists reviews_status_idx on reviews (status);
 
 create table if not exists review_ratings (
-  id         uuid primary key default gen_random_uuid(),
-  review_id  uuid not null references reviews(id) on delete cascade,
-  parameter  text not null check (parameter in
-    ('academics','teachers','facilities','safety','extracurriculars','admin','value')),
-  score      int not null check (score between 1 and 5),
-  unique (review_id, parameter)
-);
+    id         uuid primary key default gen_random_uuid(),
+    review_id  uuid not null references reviews(id) on delete cascade,
+    parameter  text not null check (parameter in
+      ('academics','teachers','facilities','safety','extracurriculars','admin','value')),
+    score      int not null check (score between 1 and 5),
+    unique (review_id, parameter)
+  );
 
 create table if not exists review_tags (
-  id         uuid primary key default gen_random_uuid(),
-  review_id  uuid not null references reviews(id) on delete cascade,
-  tag_key    text not null
-);
+    id         uuid primary key default gen_random_uuid(),
+    review_id  uuid not null references reviews(id) on delete cascade,
+    tag_key    text not null
+  );
 
 create table if not exists review_fee_inputs (
-  id             uuid primary key default gen_random_uuid(),
-  review_id      uuid not null references reviews(id) on delete cascade,
-  component      text not null check (component in
-    ('tuition','admission','transport','tech_books','deposit','other')),
-  amount_inr     numeric not null check (amount_inr > 0),
-  academic_year  text not null
-);
+    id             uuid primary key default gen_random_uuid(),
+    review_id      uuid not null references reviews(id) on delete cascade,
+    component      text not null check (component in
+      ('tuition','admission','transport','tech_books','deposit','other')),
+    amount_inr     numeric not null check (amount_inr > 0),
+    academic_year  text not null
+  );
 
 create table if not exists review_responses (
-  id             uuid primary key default gen_random_uuid(),
-  review_id      uuid not null references reviews(id) on delete cascade,
-  response_text  text not null,
-  responded_at   timestamptz not null default now()
-);
+    id             uuid primary key default gen_random_uuid(),
+    review_id      uuid not null references reviews(id) on delete cascade,
+    response_text  text not null,
+    responded_at   timestamptz not null default now()
+  );
 
 -- ---------------------------------------------------------------------------
 -- school_claims — a school rep's claim on a listing.
@@ -78,44 +78,61 @@ create table if not exists review_responses (
 -- storing the dashboard bearer token in plaintext and to bound its lifetime.
 -- ---------------------------------------------------------------------------
 create table if not exists school_claims (
-  id                 uuid primary key default gen_random_uuid(),
-  school_slug        text not null,
-  contact_name       text,
-  contact_role       text,
-  contact_email      text not null,
-  email_domain       text,
-  domain_match       boolean not null default false,
-  status             text not null default 'pending' check (status in
-    ('pending','pending_confirmation','verified','rejected')),
-  dashboard_token    text,          -- legacy plaintext column; kept for rows written before
+    id                 uuid primary key default gen_random_uuid(),
+    school_slug        text not null,
+    contact_name       text,
+    contact_role       text,
+    contact_email      text not null,
+    email_domain       text,
+    domain_match       boolean not null default false,
+    status             text not null default 'pending' check (status in
+      ('pending','pending_confirmation','verified','rejected')),
+    dashboard_token    text,          -- legacy plaintext column; kept for rows written before
                                      -- migration 0001, no longer written to by new code.
   token_hash         text,          -- sha256(dashboard token) — the fee-editing bearer key.
   token_expires_at   timestamptz,
-  confirm_token_hash text,          -- sha256(email-confirmation token), single-use, cleared on redemption.
+    confirm_token_hash text,          -- sha256(email-confirmation token), single-use, cleared on redemption.
   confirm_expires_at timestamptz,
-  verified_at        timestamptz,
-  created_at         timestamptz not null default now()
-);
+    verified_at        timestamptz,
+    created_at         timestamptz not null default now()
+  );
 create index if not exists school_claims_slug_idx on school_claims (school_slug);
 create index if not exists school_claims_token_hash_idx on school_claims (token_hash);
 create index if not exists school_claims_confirm_token_hash_idx on school_claims (confirm_token_hash);
 
 create table if not exists school_fee_submissions (
-  id             uuid primary key default gen_random_uuid(),
-  school_id      text not null,     -- school slug, consistent with reviews.school_id
+    id             uuid primary key default gen_random_uuid(),
+    school_id      text not null,     -- school slug, consistent with reviews.school_id
   component      text not null check (component in
-    ('tuition','admission','transport','tech_books','deposit','other')),
-  amount_inr     numeric not null check (amount_inr >= 0),
-  academic_year  text not null check (academic_year ~ '^\d{4}-\d{2}$'),
-  submitted_by   text,
-  notes          text,
-  stated_at      timestamptz not null default now()
-);
+      ('tuition','admission','transport','tech_books','deposit','other')),
+    amount_inr     numeric not null check (amount_inr >= 0),
+    academic_year  text not null check (academic_year ~ '^\d{4}-\d{2}$'),
+    submitted_by   text,
+    notes          text,
+    stated_at      timestamptz not null default now()
+  );
 create index if not exists school_fee_submissions_school_id_idx on school_fee_submissions (school_id);
 
--- ---------------------------------------------------------------------------
--- submissions table: app/api/submit writes to Supabase STORAGE (bucket
--- "submissions"), not a table — see the Engineering Dossier §4.3 reconciliation
--- note about a separate Postgres `submissions` table created via a one-off
--- scheduled task. Not modeled here since the live API code path uses Storage.
--- ---------------------------------------------------------------------------
+-- submissions: public "suggest a change" intake (app/api/submit) — add a
+-- school, correct details, report a curriculum not offered, request removal,
+-- or general feedback. Reviewed via the private queue at
+-- app/api/admin/submissions before anything is ever applied to the live
+-- directory. Added by migration 0003_submissions_table.sql, replacing the
+-- earlier design where these were written as JSON blobs to a Supabase
+-- Storage bucket named "submissions".
+create table if not exists submissions (
+    id             uuid primary key default gen_random_uuid(),
+    request_type   text not null check (request_type in
+      ('add_school','correct_details','not_offered','remove','feedback','other')),
+    school_name    text,
+    school_url     text,
+    evidence       text,
+    contact_name   text,
+    contact_role   text,
+    contact_email  text not null,
+    message        text not null,
+    status         text not null default 'new' check (status in ('new','actioned','dismissed')),
+    created_at     timestamptz not null default now()
+  );
+create index if not exists submissions_status_idx on submissions (status);
+create index if not exists submissions_created_at_idx on submissions (created_at);
