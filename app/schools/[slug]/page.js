@@ -4,6 +4,8 @@ import SchoolReviews from '@/app/components/SchoolReviews';
 import FeesPanel from '@/app/components/FeesPanel';
 import MapBlock from '@/app/components/MapBlock';
 import PhotoBlock from '@/app/components/PhotoBlock';
+import ShortlistButton from '@/app/components/ShortlistButton';
+import AlertToggle from '@/app/components/AlertToggle';
 
 const SITE = 'https://theschoolalmanac.com';
 
@@ -80,6 +82,11 @@ export default function SchoolPage({ params }) {
 {s.area ? s.area + ' - ' : ''}
           <a href={cityHref}>{s.city}</a>
 {boardHref ? <span>{' - '}<a href={boardHref}>{firstBoard} schools</a></span> : null}
+</div>
+
+<div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginTop: 12 }}>
+  <ShortlistButton slug={s.slug} />
+  <AlertToggle slug={s.slug} />
 </div>
 
 {s.tier === 'listing'
