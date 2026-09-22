@@ -1,5 +1,6 @@
 import './globals.css';
 import Analytics from '@/app/components/Analytics';
+import AuthWidget from '@/app/components/AuthWidget';
 
 const SITE = 'https://theschoolalmanac.com';
 const DESC =
@@ -65,7 +66,8 @@ export default function RootLayout({ children }) {
           <div className="wrap nav">
             <a href="/" className="logo"><span className="mark">✓</span>The School Almanac</a>
             <div className="spacer" />
-            <span className="verified-note"><span className="vdot" />Every school shows when we last checked it</span>
+            <span className="verified-note" style={{ marginRight: 4 }}><span className="vdot" />Every school shows when we last checked it</span>
+            <AuthWidget />
           </div>
         </header>
         {children}
