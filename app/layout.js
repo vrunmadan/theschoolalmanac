@@ -65,6 +65,7 @@ export default function RootLayout({ children }) {
         <header className="site-header">
           <div className="wrap nav">
             <a href="/" className="logo"><span className="mark">✓</span>The School Almanac</a>
+            <a href="/guides" className="small" style={{ marginLeft: 18 }}>Guides</a>
             <div className="spacer" />
             <span className="verified-note" style={{ marginRight: 4 }}><span className="vdot" />Every school shows when we last checked it</span>
             <AuthWidget />
@@ -78,6 +79,8 @@ export default function RootLayout({ children }) {
             their verified profile is today; once verified parent reviews are live, ranking will be driven
             by those ratings. We publish fees plainly, flag uncertainty, and never sell parent data.
             <div style={{ marginTop: 12 }}>
+              <a href="/guides">Guides</a>
+              {' · '}
               <a href="/contact">Contact &amp; suggest a change</a>
               {' · '}
               <a href="/contact">Add or remove a school</a>
