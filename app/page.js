@@ -1,10 +1,12 @@
 import { getAllSchools, getCities, getBoards, slugify } from '@/lib/schools';
+import { getAllGuides } from '@/lib/guides';
 import Directory from '@/app/components/Directory';
 
 export default function HomePage() {
   const schools = getAllSchools();
   const cities = getCities();
   const boards = getBoards();
+  const guides = getAllGuides();
 
   const cityCounts = {};
   for (const s of schools) if (s.city) cityCounts[s.city] = (cityCounts[s.city] || 0) + 1;
@@ -35,6 +37,24 @@ export default function HomePage() {
       </section>
 
       <Directory schools={schools} cities={cities} boards={boards} />
+
+      <section style={{ margin: '8px 0 40px' }}>
+        <div className="eyebrow" style={{ marginBottom: 8 }}>From our guides</div>
+        <div className="grid">
+          {guides.map((g) => (
+            <a
+              key={g.slug}
+              href={`/guides/${g.slug}`}
+              className="card"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div className="eyebrow" style={{ marginBottom: 0 }}>{g.category}</div>
+              <h3>{g.title}</h3>
+              <p className="small muted" style={{ margin: 0 }}>{g.description}</p>
+            </a>
+          ))}
+        </div>
+      </section>
     </main>
   );
 }
